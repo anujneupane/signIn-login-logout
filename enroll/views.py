@@ -1,10 +1,8 @@
 from django.shortcuts import render,HttpResponseRedirect
-from .form import Sign
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import authenticate,login,logout
+from .form import Sign,Changeuser
+from django.contrib.auth.forms import AuthenticationForm,PasswordChangeForm
+from django.contrib.auth import authenticate,login,logout,update_session_auth_hash
 from django.contrib import messages
-
-
 
 # Create your views here.
 def Sign_up(request):
@@ -30,24 +28,26 @@ def Login(request):
                            )
             if user is not None:
                login(request,user)
-               messages.add_message(request,messages.SUCCESS,'LogIn Successfully')
+               messages.success(request,'LogIn Successfully')
                return HttpResponseRedirect('/welcome/')
-            messages.error(request, "wrong username or password!")
-            return HttpResponseRedirect('/login/')
-         messages.error(request, "wrong username or password!")
-         return HttpResponseRedirect('/welcome/')
                
       else:
-            fm = AuthenticationForm()
-            return render(request,'enroll/login.html', {'form': fm})   
-    
+        fm = AuthenticationForm()
+      return render(request,'enroll/login.html', {'form': fm})   
    else:
        return HttpResponseRedirect('/welcome/')
        
 
 def welcome(request):
    if request.user.is_authenticated:
-       return render(request,'enroll/welcome.html' , {'name':request.user})
+       if request.method == "POST":
+          fm = Changeuser(request.POST, instance = request.user)
+          if fm.is_valid():
+             messages.success(request,"User Profile Modified Successfully")
+             fm.save()
+       else:
+          fm = Changeuser(instance = request.user)
+       return render(request,'enroll/welcome.html' , {'name':request.user,'form':fm})
    else:
         return HttpResponseRedirect('/login/')
 
@@ -55,3 +55,21 @@ def welcome(request):
 def userlogout(request):
    logout(request)
    return HttpResponseRedirect('/login/')
+
+def passchange(request):
+  if request.user.is_authenticated:
+   if request.method == "POST":
+      fm = PasswordChangeForm(user=request.user,data=request.POST)
+      if fm.is_valid():
+         fm.save()
+         update_session_auth_hash(request,fm.user)
+         return HttpResponseRedirect('/welcome/',messages.success(request,'Password Changed Successfully') )
+   else:
+      fm = PasswordChangeForm(user=request.user)
+   return render(request,'enroll/change.html', {'form': fm})
+  else:
+     return HttpResponseRedirect('/login/')
+  
+
+ 
+

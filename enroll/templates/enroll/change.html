@@ -3,16 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>welcome</title>
+    <title>Password Change</title>
 </head>
 <body>
-    <h1>Welcome {{name}} </h1>
-    {% if messages %}
-    {% for message in messages %}
-   <h5 style='color:green'> {{message}} </h5> <br>
-    {% endfor %}
-    {% endif %}
-
     <form action="" method = 'post' novalidate> {% csrf_token %}
         {% if form.non_field_errors %}
         {% for error  in form.non_field_errors  %}
@@ -23,14 +16,7 @@
         {% for fm in form %}
         {{fm.label}} {{fm}} {{fm.errors|striptags}} <br> <br>
         {% endfor %}
-        <input type="submit" value = "Submit">
-    </form> 
-
-   <button> <a href="{% url 'logout' %}"> Logout </a>   </button> 
-   <button> <a href="{% url 'passchange' %}"> Change Password </a>   </button> 
-   
-
-
-
+        <input type="submit" value = 'save'>
+    </form>
 </body>
 </html>
