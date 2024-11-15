@@ -1,15 +1,16 @@
 from django.shortcuts import render,HttpResponseRedirect
-from .form import Sign,Changeuser
+from .form import Sign,Changeuser,adminje
 from django.contrib.auth.forms import AuthenticationForm,PasswordChangeForm
 from django.contrib.auth import authenticate,login,logout,update_session_auth_hash
 from django.contrib import messages
+from django.contrib.auth.models import User
 
 # Create your views here.
 def Sign_up(request):
     if request.method == 'POST':
      fm = Sign(request.POST)
      if fm.is_valid():
-        fm.save()
+        fm.save()  
         messages.add_message(request,messages.SUCCESS,'Account Created Successfully')
     else:
       fm = Sign()
@@ -41,13 +42,22 @@ def Login(request):
 def welcome(request):
    if request.user.is_authenticated:
        if request.method == "POST":
-          fm = Changeuser(request.POST, instance = request.user)
+          if request.user.is_superuser == True:
+           fm = adminje(request.POST, instance = request.user)
+           users = User.objects.all()
+          else:
+           fm = Changeuser(request.POST, instance = request.user)
           if fm.is_valid():
              messages.success(request,"User Profile Modified Successfully")
              fm.save()
        else:
-          fm = Changeuser(instance = request.user)
-       return render(request,'enroll/welcome.html' , {'name':request.user,'form':fm})
+          if request.user.is_superuser == True:
+             fm = adminje(instance = request.user)
+             users = User.objects.all()
+          else:
+           fm = Changeuser(instance = request.user)
+           users = None
+       return render(request,'enroll/welcome.html' , {'name':request.user,'form':fm,'users':users})
    else:
         return HttpResponseRedirect('/login/')
 

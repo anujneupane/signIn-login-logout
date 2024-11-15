@@ -13,3 +13,10 @@ class Changeuser(UserChangeForm):
         model = User
         fields = ['username','first_name','last_name','email','date_joined','last_login']
         labels = {'email': 'Email'} 
+
+class adminje(UserChangeForm):
+    password = None
+    class Meta:
+        model = User
+        fields = '__all__'
+        labels = {'email': 'Email'} 
